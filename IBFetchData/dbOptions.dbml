@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?><Database Name="options" Class="dbOptionsDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Connection Mode="AppSettings" ConnectionString="Data Source=(LocalDB)\v11.0;AttachDbFilename=E:\Finance\Database\options.mdf;Integrated Security=True;Connect Timeout=30" SettingsObjectName="IBFetchData.Properties.Settings" SettingsPropertyName="optionsConnectionString" Provider="System.Data.SqlClient" />
+  <Table Name="dbo.Portfolio" Member="Portfolios">
+    <Type Name="Portfolio">
+      <Column Name="ClientID" Type="System.String" DbType="VarChar(25) NOT NULL" CanBeNull="false" />
+      <Column Name="PortfolioName" Type="System.String" DbType="VarChar(25) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="MinMarketCap" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="Market" Type="System.String" DbType="VarChar(2)" CanBeNull="true" />
+      <Association Name="Portfolio_PortfolioStock" Member="PortfolioStocks" ThisKey="PortfolioName" OtherKey="PortfolioName" Type="PortfolioStock" />
+    </Type>
+  </Table>
+  <Table Name="dbo.PortfolioStock" Member="PortfolioStocks">
+    <Type Name="PortfolioStock">
+      <Column Name="PortfolioName" Type="System.String" DbType="VarChar(25) NOT NULL" CanBeNull="false" />
+      <Column Name="Ticker" Type="System.String" DbType="VarChar(10) NOT NULL" CanBeNull="false" />
+      <Association Name="Portfolio_PortfolioStock" Member="Portfolio" ThisKey="PortfolioName" OtherKey="PortfolioName" Type="Portfolio" IsForeignKey="true" />
+      <Association Name="Stock_PortfolioStock" Member="Stock" ThisKey="Ticker" OtherKey="Ticker" Type="Stock" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.PriceHistory" Member="PriceHistories">
+    <Type Name="PriceHistory">
+      <Column Name="Ticker" Type="System.String" DbType="VarChar(10) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="PriceDate" Type="System.DateTime" DbType="Date NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="PriceTime" Type="System.TimeSpan" DbType="Time NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="ClosingPrice" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="OpeningPrice" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="HighPrice" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="LowPrice" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="Volume" Type="System.Decimal" DbType="Decimal(18,0)" CanBeNull="true" />
+      <Column Name="WAP" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="OpeningIV" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="ClosingIV" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="HighIV" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="LowIV" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="PercentBB" Type="System.Double" DbType="Float" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Stock" Member="Stocks">
+    <Type Name="Stock">
+      <Column Name="Ticker" Type="System.String" DbType="VarChar(20) NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="Company" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="Sector" Type="System.String" DbType="VarChar(40)" CanBeNull="true" />
+      <Column Name="Industry" Type="System.String" DbType="VarChar(40)" CanBeNull="true" />
+      <Column Name="Market" Type="System.String" DbType="VarChar(2)" CanBeNull="true" />
+      <Column Name="DividendStart" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="DividendCommentary" Type="System.String" DbType="Text" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="LastTrade" Type="System.Decimal" DbType="Decimal(18,4)" CanBeNull="true" />
+      <Column Name="AverageVolume" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="MarketCap" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="PriceEarningRatio" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="EarningsPerShare" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="DividendYield" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="PriceBookRatio" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="SharesOutstanding" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="PayoutRatio" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="TotalCurrentAssets" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="TotalAssets" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="TotalCurrentLiabilities" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="TotalLiabilities" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="LongTermDebt" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="StockholderEquity" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="ATMStrike" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="ATMCallOpenInterest" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="ATMPutOpenInterest" Type="System.Decimal" DbType="Decimal(24,4)" CanBeNull="true" />
+      <Column Name="DailyVolume" Type="System.Decimal" DbType="Decimal(24,2)" CanBeNull="true" />
+      <Column Name="OverrideCode" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="OverrideReason" Type="System.String" DbType="Text" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="LastUpdateSuccessful" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Column Name="[Ex-DividendDate]" Member="Ex_DividendDate" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="NextEarnings" Type="System.String" DbType="VarChar(20)" CanBeNull="true" />
+      <Column Name="AnalystsRating" Type="System.String" DbType="VarChar(10)" CanBeNull="true" />
+      <Column Name="NakedOptions" Type="System.Boolean" DbType="Bit" CanBeNull="true" />
+      <Column Name="IVPercentile" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="IVRank" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="PercentBB" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="PriceChange5Day" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="PriceChange10Day" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="PriceChange15Day" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Beta" Type="System.Double" DbType="Float" CanBeNull="true" />
+      <Column Name="Exchange" Type="System.String" DbType="VarChar(8) NOT NULL" CanBeNull="false" />
+      <Column Name="PrimExchange" Type="System.String" DbType="VarChar(8)" CanBeNull="true" />
+      <Column Name="SecType" Type="System.String" DbType="VarChar(6) NOT NULL" CanBeNull="false" />
+      <Column Name="FutureExpiry" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Association Name="Stock_PortfolioStock" Member="PortfolioStocks" ThisKey="Ticker" OtherKey="Ticker" Type="PortfolioStock" />
+    </Type>
+  </Table>
+  <Function Name="dbo.UpsertIVHistory" Method="UpsertIVHistory">
+    <Parameter Name="ticker" Type="System.String" DbType="VarChar(10)" />
+    <Parameter Name="pricedatetime" Type="System.DateTime" DbType="DateTime" />
+    <Parameter Name="closingIV" Type="System.Double" DbType="Float" />
+    <Parameter Name="openingIV" Type="System.Double" DbType="Float" />
+    <Parameter Name="highIV" Type="System.Double" DbType="Float" />
+    <Parameter Name="lowIV" Type="System.Double" DbType="Float" />
+    <Return Type="System.Int32" />
+  </Function>
+  <Function Name="dbo.UpsertPriceHistory" Method="UpsertPriceHistory">
+    <Parameter Name="ticker" Type="System.String" DbType="VarChar(10)" />
+    <Parameter Name="pricedatetime" Type="System.DateTime" DbType="DateTime" />
+    <Parameter Name="closingprice" Type="System.Decimal" DbType="Decimal(18,4)" />
+    <Parameter Name="openingprice" Type="System.Decimal" DbType="Decimal(18,4)" />
+    <Parameter Name="highprice" Type="System.Decimal" DbType="Decimal(18,4)" />
+    <Parameter Name="lowprice" Type="System.Decimal" DbType="Decimal(18,4)" />
+    <Parameter Name="volume" Type="System.Int32" DbType="Int" />
+    <Parameter Name="weightedaverageprice" Type="System.Decimal" DbType="Decimal(18,4)" />
+    <Return Type="System.Int32" />
+  </Function>
+</Database>
