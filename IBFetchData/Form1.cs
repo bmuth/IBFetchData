@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using TWSLib;
+using IBApi;
 using SWI.Controls;
 using System.Globalization;
 using System.Xml.Linq;
@@ -78,7 +78,7 @@ namespace IBFetchData
 
             InitializeComponent ();
 
-            IBapi.axtws = axTws;
+            IBapi.ib = new EWrapperImpl (m_Log);
 
             RecomputePortfolioList ();
             m_StockInfoQueue = null;
@@ -123,7 +123,7 @@ namespace IBFetchData
                 string host = "127.0.0.1";
                 try
                 {
-                    axTws.connect (host, port, clientId);
+                    IBapi.ib.ClientSocket.eConnect (host, port, clientId);
                     m_IfConnected = true;
                 }
                 catch (Exception ex)
@@ -142,7 +142,7 @@ namespace IBFetchData
             }
             else
             {
-                axTws.disconnect ();
+                IBapi.ib.ClientSocket.eDisconnect ();
                 m_IfConnected = false;
                 btnConnect.Text = "Connect";
                 AddMessage (ErrorLevel.logINF, "Disconnected.");
@@ -200,7 +200,7 @@ namespace IBFetchData
 
         private void btnOptionChain_Click (object sender, EventArgs e)
         {
-            m_OptionOptionInfo = new SortableBindingList<OptionInfo> ();
+ /*           m_OptionOptionInfo = new SortableBindingList<OptionInfo> ();
 
             IContract contract = axTws.createContract ();
 
@@ -217,10 +217,10 @@ namespace IBFetchData
             contract.includeExpired = 0;
 
             AddMessage (ErrorLevel.logINF, string.Format ("Getting Chain for {0}", tbStock.Text));
-            axTws.reqContractDetailsEx (Constants.OPTIONS_OPTIONS_DATA | 0, contract);
+            axTws.reqContractDetailsEx (Constants.OPTIONS_OPTIONS_DATA | 0, contract);*/
         }
 
-
+/*
         private void axTws_contractDetailsEx (object sender, AxTWSLib._DTwsEvents_contractDetailsExEvent e)
         {
             IContract d = (IContract) e.contractDetails.summary;
@@ -334,12 +334,12 @@ namespace IBFetchData
 
                 /* Now pick up the option prices
                  * ----------------------------- */
-
+/*
                 FetchOptionPrices ();
             }
 
         }
-
+*/
         /*****************************************************************************
          * 
          * FetchOptionPrices
@@ -389,7 +389,7 @@ namespace IBFetchData
 
         private async void btnStartHistorical_Click (object sender, EventArgs e)
         {
-            if (m_IfCollectingHistorical == false)
+/*            if (m_IfCollectingHistorical == false)
             {
                 btnStartHistorical.Text = "Cancel";
                 m_IfCollectingHistorical = true;
@@ -498,7 +498,7 @@ namespace IBFetchData
             else
             {
                 m_StockInfoQueue.stop ();
-            }
+            }*/
         }
 
         /********************************************************************
@@ -506,7 +506,7 @@ namespace IBFetchData
          * Collecting historial data
          * 
          * *****************************************************************/
-
+/*
         private void axTws_historicalData (object sender, AxTWSLib._DTwsEvents_historicalDataEvent e)
         {
             int index = e.reqId & 0xFFFF;
@@ -555,7 +555,7 @@ namespace IBFetchData
             //    }
             //}
         }
-
+*/
         /**************************************************************
          * 
          * IV or price on another equity has been obtained
@@ -1049,7 +1049,7 @@ namespace IBFetchData
             m_Log.Dispose ();
             if (m_IfConnected)
             {
-                axTws.disconnect ();
+                IBapi.ib.ClientSocket.eDisconnect (true);
             }
         }
 
@@ -1237,52 +1237,53 @@ namespace IBFetchData
 
         private Task EnumerateScannerParameters ()
         {
-            return Task.Run (() =>
-            {
-
-                var scanparametershandler = default (AxTWSLib._DTwsEvents_scannerParametersEventHandler);
-                var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
-
-                errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
-                {
-                    axTws.scannerParameters -= scanparametershandler;
-                    axTws.errMsg -= errhandler;
-                });
-
-                scanparametershandler = new AxTWSLib._DTwsEvents_scannerParametersEventHandler ((s, e) =>
-                {
-                    string xml = e.xml;
-                    XDocument xdocument = XDocument.Parse (xml);
-
-                    IEnumerable<XElement> ScanCodes = xdocument.Descendants ("ScanType");
-
-                    List<scantypes> DefinedScans = new List<scantypes> ();
-
-                    foreach (var scancode in ScanCodes)
-                    {
-                        if (scancode.Element ("displayName") != null)
+            /*            return Task.Run (() =>
                         {
-                            if (scancode.Element ("instruments").Value.Contains ("STK"))
+
+                            var scanparametershandler = default (AxTWSLib._DTwsEvents_scannerParametersEventHandler);
+                            var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
+
+                            errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
                             {
-                                DefinedScans.Add (new scantypes (scancode.Element ("displayName").Value, scancode.Element ("scanCode").Value));
+                                axTws.scannerParameters -= scanparametershandler;
+                                axTws.errMsg -= errhandler;
+                            });
 
-                            }
-                            string x = scancode.Element ("displayName").Value;
-                        }
-                    }
+                            scanparametershandler = new AxTWSLib._DTwsEvents_scannerParametersEventHandler ((s, e) =>
+                            {
+                                string xml = e.xml;
+                                XDocument xdocument = XDocument.Parse (xml);
 
-                    lbxDefinedScans.DisplayMember = "DisplayName";
-                    lbxDefinedScans.DataSource = DefinedScans;
+                                IEnumerable<XElement> ScanCodes = xdocument.Descendants ("ScanType");
 
-                    axTws.scannerParameters -= scanparametershandler;
-                    axTws.errMsg -= errhandler;
-                });
+                                List<scantypes> DefinedScans = new List<scantypes> ();
 
-                axTws.errMsg += errhandler;
-                axTws.scannerParameters += scanparametershandler;
+                                foreach (var scancode in ScanCodes)
+                                {
+                                    if (scancode.Element ("displayName") != null)
+                                    {
+                                        if (scancode.Element ("instruments").Value.Contains ("STK"))
+                                        {
+                                            DefinedScans.Add (new scantypes (scancode.Element ("displayName").Value, scancode.Element ("scanCode").Value));
 
-                axTws.reqScannerParameters ();
-            });
+                                        }
+                                        string x = scancode.Element ("displayName").Value;
+                                    }
+                                }
+
+                                lbxDefinedScans.DisplayMember = "DisplayName";
+                                lbxDefinedScans.DataSource = DefinedScans;
+
+                                axTws.scannerParameters -= scanparametershandler;
+                                axTws.errMsg -= errhandler;
+                            });
+
+                            axTws.errMsg += errhandler;
+                            axTws.scannerParameters += scanparametershandler;
+
+                            axTws.reqScannerParameters ();
+                        });*/
+            return null;
         }
 
         /***********************************************************************
@@ -1369,127 +1370,128 @@ namespace IBFetchData
                                bool bIfNoEquities,
                                int NoEquities)
         {
-            return Task.Run (() =>
-            {
-                m_bCancelScanning = false;
-                List<ScannerData> ScannerData = new List<ScannerData> ();
+            /*           return Task.Run (() =>
+                       {
+                           m_bCancelScanning = false;
+                           List<ScannerData> ScannerData = new List<ScannerData> ();
 
-                var scannerdatahandler = default (AxTWSLib._DTwsEvents_scannerDataExEventHandler);
-                var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
-                var endhandler = default (AxTWSLib._DTwsEvents_scannerDataEndEventHandler);
+                           var scannerdatahandler = default (AxTWSLib._DTwsEvents_scannerDataExEventHandler);
+                           var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
+                           var endhandler = default (AxTWSLib._DTwsEvents_scannerDataEndEventHandler);
 
-                errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
-                {
-                    axTws.scannerDataEx -= scannerdatahandler;
-                    axTws.errMsg -= errhandler;
-                    axTws.scannerDataEnd -= endhandler;
+                           errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
+                           {
+                               axTws.scannerDataEx -= scannerdatahandler;
+                               axTws.errMsg -= errhandler;
+                               axTws.scannerDataEnd -= endhandler;
 
-                    axTws.cancelScannerSubscription (ID_MARKETSCANNER);
-                    m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
-                });
+                               axTws.cancelScannerSubscription (ID_MARKETSCANNER);
+                               m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
+                           });
 
-                endhandler = new AxTWSLib._DTwsEvents_scannerDataEndEventHandler ((s, e) =>
-                {
-                    m_DisplayedScannerData = ScannerData;
-                    SortableBindingList<ScannerData> bl = new SortableBindingList<ScannerData> (m_DisplayedScannerData);
-                    dgvScanner.DataSource = bl;
-                    ScannerData = new List<ScannerData> ();
+                           endhandler = new AxTWSLib._DTwsEvents_scannerDataEndEventHandler ((s, e) =>
+                           {
+                               m_DisplayedScannerData = ScannerData;
+                               SortableBindingList<ScannerData> bl = new SortableBindingList<ScannerData> (m_DisplayedScannerData);
+                               dgvScanner.DataSource = bl;
+                               ScannerData = new List<ScannerData> ();
 
-                    if (ckbScanOnceOnly.Checked)
-                    {
-                        axTws.cancelScannerSubscription (ID_MARKETSCANNER);
-                        m_IfScanning = false;
-                        btnScan.Text = "Scan";
+                               if (ckbScanOnceOnly.Checked)
+                               {
+                                   axTws.cancelScannerSubscription (ID_MARKETSCANNER);
+                                   m_IfScanning = false;
+                                   btnScan.Text = "Scan";
 
-                        axTws.scannerDataEx -= scannerdatahandler;
-                        axTws.errMsg -= errhandler;
-                        axTws.scannerDataEnd -= endhandler;
+                                   axTws.scannerDataEx -= scannerdatahandler;
+                                   axTws.errMsg -= errhandler;
+                                   axTws.scannerDataEnd -= endhandler;
 
-                        axTws.cancelScannerSubscription (ID_MARKETSCANNER);
-                        m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
-                    }
-                });
+                                   axTws.cancelScannerSubscription (ID_MARKETSCANNER);
+                                   m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
+                               }
+                           });
 
-                scannerdatahandler = new AxTWSLib._DTwsEvents_scannerDataExEventHandler ((s, e) =>
-                {
-                    if (m_bCancelScanning)
-                    {
-                        axTws.cancelScannerSubscription (ID_MARKETSCANNER);
-                        m_IfScanning = false;
-                        btnScan.Text = "Scan";
+                           scannerdatahandler = new AxTWSLib._DTwsEvents_scannerDataExEventHandler ((s, e) =>
+                           {
+                               if (m_bCancelScanning)
+                               {
+                                   axTws.cancelScannerSubscription (ID_MARKETSCANNER);
+                                   m_IfScanning = false;
+                                   btnScan.Text = "Scan";
 
-                        axTws.scannerDataEx -= scannerdatahandler;
-                        axTws.errMsg -= errhandler;
-                        axTws.scannerDataEnd -= endhandler;
-                        
-                        axTws.cancelScannerSubscription (ID_MARKETSCANNER);
-                        m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
-                    }
+                                   axTws.scannerDataEx -= scannerdatahandler;
+                                   axTws.errMsg -= errhandler;
+                                   axTws.scannerDataEnd -= endhandler;
 
-                    ScannerData sd = new ScannerData ();
+                                   axTws.cancelScannerSubscription (ID_MARKETSCANNER);
+                                   m_Log.Log (ErrorLevel.logINF, "Scanning canceled");
+                               }
 
-                    object o = e.contractDetails.summary;
+                               ScannerData sd = new ScannerData ();
 
-                    Type objType = o.GetType ();
-                    sd.symbol = (string) objType.InvokeMember ("symbol", BindingFlags.GetProperty, null, o, null);
-                    sd.sectype = (string) objType.InvokeMember ("secType", BindingFlags.GetProperty, null, o, null);
-                    sd.expiry = (string) objType.InvokeMember ("expiry", BindingFlags.GetProperty, null, o, null);
-                    sd.strike = (double) objType.InvokeMember ("Strike", BindingFlags.GetProperty, null, o, null);
-                    sd.right = (string) objType.InvokeMember ("Right", BindingFlags.GetProperty, null, o, null);
-                    sd.exchange = (string) objType.InvokeMember ("exchange", BindingFlags.GetProperty, null, o, null);
-                    sd.currency = (string) objType.InvokeMember ("currency", BindingFlags.GetProperty, null, o, null);
-                    sd.localSymbol = (string) objType.InvokeMember ("localSymbol", BindingFlags.GetProperty, null, o, null);
-                    sd.tradingClass = (string) objType.InvokeMember ("tradingClass", BindingFlags.GetProperty, null, o, null);
-                    sd.marketName = sd.marketName;
-                    sd.distance = sd.distance;
-                    sd.benchmark = sd.benchmark;
-                    sd.projection = sd.projection;
-                    sd.legStr = sd.legStr;
+                               object o = e.contractDetails.summary;
 
-                    ScannerData.Add (sd);
-                });
+                               Type objType = o.GetType ();
+                               sd.symbol = (string) objType.InvokeMember ("symbol", BindingFlags.GetProperty, null, o, null);
+                               sd.sectype = (string) objType.InvokeMember ("secType", BindingFlags.GetProperty, null, o, null);
+                               sd.expiry = (string) objType.InvokeMember ("expiry", BindingFlags.GetProperty, null, o, null);
+                               sd.strike = (double) objType.InvokeMember ("Strike", BindingFlags.GetProperty, null, o, null);
+                               sd.right = (string) objType.InvokeMember ("Right", BindingFlags.GetProperty, null, o, null);
+                               sd.exchange = (string) objType.InvokeMember ("exchange", BindingFlags.GetProperty, null, o, null);
+                               sd.currency = (string) objType.InvokeMember ("currency", BindingFlags.GetProperty, null, o, null);
+                               sd.localSymbol = (string) objType.InvokeMember ("localSymbol", BindingFlags.GetProperty, null, o, null);
+                               sd.tradingClass = (string) objType.InvokeMember ("tradingClass", BindingFlags.GetProperty, null, o, null);
+                               sd.marketName = sd.marketName;
+                               sd.distance = sd.distance;
+                               sd.benchmark = sd.benchmark;
+                               sd.projection = sd.projection;
+                               sd.legStr = sd.legStr;
 
-                IScannerSubscription ss = axTws.createScannerSubscription ();
+                               ScannerData.Add (sd);
+                           });
 
-                ss.scanCode = ScanCode;
-                ss.instrument = "STK";
-                ss.locations = SelectedLocations;
+                           IScannerSubscription ss = axTws.createScannerSubscription ();
 
-                ss.stockTypeFilter = StockTypeFilter;
-                if (bIfPriceAbove)
-                {
-                    ss.priceAbove = Price;
-                }
-                if (bIfVolumeAbove)
-                {
-                    ss.volumeAbove = Volume;
-                }
-                if (bIfMarketCapAbove)
-                {
-                    ss.marketCapAbove = MarketCap;
-                }
-                if (bIfOptionsVolAbove)
-                {
-                    ss.averageOptionVolumeAbove = OptionsVolume;
-                }
+                           ss.scanCode = ScanCode;
+                           ss.instrument = "STK";
+                           ss.locations = SelectedLocations;
 
-                if (bIfNoEquities)
-                {
-                    ss.numberOfRows = NoEquities;
-                }
+                           ss.stockTypeFilter = StockTypeFilter;
+                           if (bIfPriceAbove)
+                           {
+                               ss.priceAbove = Price;
+                           }
+                           if (bIfVolumeAbove)
+                           {
+                               ss.volumeAbove = Volume;
+                           }
+                           if (bIfMarketCapAbove)
+                           {
+                               ss.marketCapAbove = MarketCap;
+                           }
+                           if (bIfOptionsVolAbove)
+                           {
+                               ss.averageOptionVolumeAbove = OptionsVolume;
+                           }
 
-                axTws.reqMarketDataType (ckbUseFrozenData.Checked ? 2 : 1);
+                           if (bIfNoEquities)
+                           {
+                               ss.numberOfRows = NoEquities;
+                           }
 
-                ScannerData = new List<ScannerData> ();
+                           axTws.reqMarketDataType (ckbUseFrozenData.Checked ? 2 : 1);
 
-                axTws.scannerDataEx += scannerdatahandler;
-                axTws.errMsg += errhandler;
-                axTws.scannerDataEnd += endhandler;
+                           ScannerData = new List<ScannerData> ();
 
-                m_Log.Log (ErrorLevel.logINF, "Scanning started");
-                axTws.reqScannerSubscriptionEx (ID_MARKETSCANNER, ss, null);
-                m_IfScanning = true;
-            });
+                           axTws.scannerDataEx += scannerdatahandler;
+                           axTws.errMsg += errhandler;
+                           axTws.scannerDataEnd += endhandler;
+
+                           m_Log.Log (ErrorLevel.logINF, "Scanning started");
+                           axTws.reqScannerSubscriptionEx (ID_MARKETSCANNER, ss, null);
+                           m_IfScanning = true;
+                       });*/
+            return null;
         }
 
 
@@ -1611,7 +1613,7 @@ namespace IBFetchData
          * ********************************************************/
         private void btnFetchIV_Click (object sender, EventArgs e)
         {
-            IContract contract = axTws.createContract ();
+/*            IContract contract = axTws.createContract ();
 
             for (int i = 0; i < m_DisplayedScannerData.Count; i++)
             {
@@ -1649,7 +1651,7 @@ namespace IBFetchData
                     axTws.reqMktDataEx (Constants.SCANNER_MARKET_DATA | i, contract, "100,101,104,106", 0, null);
                 }
                 break;
-            }
+            }*/
         }
 
         /***********************************************************
@@ -1998,7 +2000,7 @@ namespace IBFetchData
                 MessageBox.Show ("Error accessing resources!");
                 return;
             }
-
+/*
             try
             {
 
@@ -2046,7 +2048,7 @@ namespace IBFetchData
 
                         /* sort and keep the 100 options closest to the strike
                          * --------------------------------------------------- */
-
+/*
                         optionchain.Sort (Comparer<OptionInfo>.Create ((o1, o2) =>
                             {
                                 double diff = Math.Abs (o1.Strike - LastPrice) - Math.Abs (o2.Strike - LastPrice);
@@ -2084,7 +2086,7 @@ namespace IBFetchData
 
                     /* Update the ProbITM field
                      * ------------------------ */
-
+/*
                     foreach (var s in m_SelectedStocks[stock_no].OptionChain)
                     {
                         s.ComputeProbITM ();
@@ -2098,7 +2100,7 @@ namespace IBFetchData
             finally
             {
                 pbAnalOption.Image = null;
-            }
+            }*/
         }
 
         /***********************************************************************
@@ -2336,76 +2338,77 @@ namespace IBFetchData
 
         public Task<List<OptionInfo>> FetchOptionChain (int reqid, string right)
         {
-            List<OptionInfo> optionchain = new List<OptionInfo> ();
+            /*            List<OptionInfo> optionchain = new List<OptionInfo> ();
 
-            StockAnal stock = m_SelectedStocks[reqid];
+                        StockAnal stock = m_SelectedStocks[reqid];
 
-            var tcs = new TaskCompletionSource<List<OptionInfo>> ();
-            TWSLib.IContract contract = axTws.createContract ();
+                        var tcs = new TaskCompletionSource<List<OptionInfo>> ();
+                        TWSLib.IContract contract = axTws.createContract ();
 
-            contract.symbol = Utils.Massage (stock.Ticker);
+                        contract.symbol = Utils.Massage (stock.Ticker);
 
-            contract.secType = "OPT";
-            contract.expiry = (DateTime.Parse (cbAnalExpires.Text)).ToString ("yyyyMMdd");
-            contract.strike = 0.0;
-            contract.right = right;
-            contract.multiplier = "100";  // skips around the mini's in SPY, for example
-//            contract.multiplier = "";
-            contract.exchange = stock.Exchange;
-            contract.primaryExchange = "";
-            contract.currency = "USD";
-            contract.localSymbol = "";
-            contract.includeExpired = 0;
+                        contract.secType = "OPT";
+                        contract.expiry = (DateTime.Parse (cbAnalExpires.Text)).ToString ("yyyyMMdd");
+                        contract.strike = 0.0;
+                        contract.right = right;
+                        contract.multiplier = "100";  // skips around the mini's in SPY, for example
+            //            contract.multiplier = "";
+                        contract.exchange = stock.Exchange;
+                        contract.primaryExchange = "";
+                        contract.currency = "USD";
+                        contract.localSymbol = "";
+                        contract.includeExpired = 0;
 
-            m_Log.Log (ErrorLevel.logDEB, string.Format ("Getting option for {0}", stock.Ticker));
+                        m_Log.Log (ErrorLevel.logDEB, string.Format ("Getting option for {0}", stock.Ticker));
 
-            var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
-            var datahandler = default (AxTWSLib._DTwsEvents_contractDetailsExEventHandler);
-            var endhandler = default (AxTWSLib._DTwsEvents_contractDetailsEndEventHandler);
+                        var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
+                        var datahandler = default (AxTWSLib._DTwsEvents_contractDetailsExEventHandler);
+                        var endhandler = default (AxTWSLib._DTwsEvents_contractDetailsEndEventHandler);
 
-            errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
-            {
-                tcs.TrySetException (new Exception (e.errorMsg));
+                        errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
+                        {
+                            tcs.TrySetException (new Exception (e.errorMsg));
 
-                axTws.contractDetailsEx -= datahandler;
-                axTws.errMsg -= errhandler;
-                axTws.contractDetailsEnd -= endhandler;
-            });
+                            axTws.contractDetailsEx -= datahandler;
+                            axTws.errMsg -= errhandler;
+                            axTws.contractDetailsEnd -= endhandler;
+                        });
 
-            endhandler = new AxTWSLib._DTwsEvents_contractDetailsEndEventHandler ((s, e) =>
-            {
-                if (e.reqId == (Constants.ANALYZE_OPTIONS_DATA | reqid))
-                {
-                    try
-                    {
-                        tcs.TrySetResult (optionchain);
-                    }
-                    finally
-                    {
-                        axTws.contractDetailsEx -= datahandler;
-                        axTws.errMsg -= errhandler;
-                        axTws.contractDetailsEnd -= endhandler;
-                    }
-                }
-            });
+                        endhandler = new AxTWSLib._DTwsEvents_contractDetailsEndEventHandler ((s, e) =>
+                        {
+                            if (e.reqId == (Constants.ANALYZE_OPTIONS_DATA | reqid))
+                            {
+                                try
+                                {
+                                    tcs.TrySetResult (optionchain);
+                                }
+                                finally
+                                {
+                                    axTws.contractDetailsEx -= datahandler;
+                                    axTws.errMsg -= errhandler;
+                                    axTws.contractDetailsEnd -= endhandler;
+                                }
+                            }
+                        });
 
-            datahandler = new AxTWSLib._DTwsEvents_contractDetailsExEventHandler ((s, e) =>
-            {
-                TWSLib.IContractDetails c = e.contractDetails;
-                TWSLib.IContract d = (TWSLib.IContract) c.summary;
-                if ((Constants.ANALYZE_OPTIONS_DATA | reqid) == e.reqId)
-                {
-                    m_Log.Log (ErrorLevel.logINF, string.Format ("New opt sym {0} localsym {1} mult: {2}, strike {3}", d.symbol, d.localSymbol, d.multiplier, d.strike));
-                    optionchain.Add (new OptionInfo (d.currency, d.exchange, d.expiry, d.strike, d.symbol, d.localSymbol, d.multiplier, d.secId, d.secIdType, d.secType, d.right, d.tradingClass));
-                }
-            });
+                        datahandler = new AxTWSLib._DTwsEvents_contractDetailsExEventHandler ((s, e) =>
+                        {
+                            TWSLib.IContractDetails c = e.contractDetails;
+                            TWSLib.IContract d = (TWSLib.IContract) c.summary;
+                            if ((Constants.ANALYZE_OPTIONS_DATA | reqid) == e.reqId)
+                            {
+                                m_Log.Log (ErrorLevel.logINF, string.Format ("New opt sym {0} localsym {1} mult: {2}, strike {3}", d.symbol, d.localSymbol, d.multiplier, d.strike));
+                                optionchain.Add (new OptionInfo (d.currency, d.exchange, d.expiry, d.strike, d.symbol, d.localSymbol, d.multiplier, d.secId, d.secIdType, d.secType, d.right, d.tradingClass));
+                            }
+                        });
 
-            axTws.contractDetailsEx += datahandler;
-            axTws.errMsg += errhandler;
-            axTws.contractDetailsEnd += endhandler;
+                        axTws.contractDetailsEx += datahandler;
+                        axTws.errMsg += errhandler;
+                        axTws.contractDetailsEnd += endhandler;
 
-            axTws.reqContractDetailsEx (Constants.ANALYZE_OPTIONS_DATA | reqid, contract);
-            return tcs.Task;
+                        axTws.reqContractDetailsEx (Constants.ANALYZE_OPTIONS_DATA | reqid, contract);
+                        return tcs.Task;*/
+            return null;
         }
 
         /********************************************************
@@ -2432,205 +2435,206 @@ namespace IBFetchData
 
         public Task<int> FetchOptionChainMarketData (int stock_no)
         {
-            timerOptChain.AutoReset = false;
-            timerOptChain.Interval = 5000;
+            /*            timerOptChain.AutoReset = false;
+                        timerOptChain.Interval = 5000;
 
-            List<OptionInfo> optionchain = m_SelectedStocks[stock_no].OptionChain;
+                        List<OptionInfo> optionchain = m_SelectedStocks[stock_no].OptionChain;
 
-            var tcs = new TaskCompletionSource<int> ();
+                        var tcs = new TaskCompletionSource<int> ();
 
-            var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
-            var endhandler = default (AxTWSLib._DTwsEvents_tickSnapshotEndEventHandler);
-            var pricehandler = default (AxTWSLib._DTwsEvents_tickPriceEventHandler);
-            var optioncomputehandler = default (AxTWSLib._DTwsEvents_tickOptionComputationEventHandler);
-            var generichandler = default (AxTWSLib._DTwsEvents_tickGenericEventHandler);
-            var sizehander = default (AxTWSLib._DTwsEvents_tickSizeEventHandler);
-            var timerhandler = default (System.Timers.ElapsedEventHandler);
+                        var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
+                        var endhandler = default (AxTWSLib._DTwsEvents_tickSnapshotEndEventHandler);
+                        var pricehandler = default (AxTWSLib._DTwsEvents_tickPriceEventHandler);
+                        var optioncomputehandler = default (AxTWSLib._DTwsEvents_tickOptionComputationEventHandler);
+                        var generichandler = default (AxTWSLib._DTwsEvents_tickGenericEventHandler);
+                        var sizehander = default (AxTWSLib._DTwsEvents_tickSizeEventHandler);
+                        var timerhandler = default (System.Timers.ElapsedEventHandler);
 
-            errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
-            {
-                if (e.id != -1)
-                {
-                    m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: error {0} {1}", OptIdDisplay (e.id), e.errorMsg));
-
-                    if ((e.id & 0xFFFF0000) != Constants.ANALYZE_OPTIONS_MARKET_DATA)
-                    {
-                        return;
-                    }
-
-                    axTws.errMsg -= errhandler;
-                    axTws.tickGeneric -= generichandler;
-                    axTws.tickPrice -= pricehandler;
-                    axTws.tickOptionComputation -= optioncomputehandler;
-                    axTws.tickSnapshotEnd -= endhandler;
-                    axTws.tickSize -= sizehander;
-                    timerOptChain.Elapsed -= timerhandler;
-
-                    for (int option_no = 0; option_no < optionchain.Count; option_no++)
-                    {
-                        axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
-                    }
-
-                    tcs.TrySetException (new Exception (e.errorMsg));
-                }
-                else
-                {
-                    m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: error {0:x} {1}", e.id, e.errorMsg));
-                }
-            });
-
-            pricehandler = new AxTWSLib._DTwsEvents_tickPriceEventHandler ((s, e) =>
-            {
-                if ((e.id & 0xFFFF0000) != Constants.ANALYZE_OPTIONS_MARKET_DATA)
-                {
-                    return;
-                }
-
-                m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: axTws_tickPrice for {0} tickType:{1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.price));
-
-                e.id &= 0xFFFF;
-                int s_no = e.id >> 8;
-                int opt_no = e.id & 0xFF;
-                StockAnal st = m_SelectedStocks[s_no];
-                OptionInfo opt = st.OptionChain[opt_no];
-
-                switch (e.tickType)
-                {
-                    case TickType.CLOSE:
-                        opt.Last = e.price;
-                        break;
-
-                    case TickType.BID:
-                        opt.Bid = e.price;
-                        break;
-
-                    case TickType.ASK:
-                        opt.Ask = e.price;
-                        break;
-
-                    default:
-                        break;
-                }
-            });
-
-            sizehander = new AxTWSLib._DTwsEvents_tickSizeEventHandler ((s, e) =>
-            {
-                m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickSize for {0} tickType: {1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.size));
-                switch (e.tickType)
-                {
-                    case TickType.OPTION_PUT_OPEN_INTEREST:
+                        errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
                         {
+                            if (e.id != -1)
+                            {
+                                m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: error {0} {1}", OptIdDisplay (e.id), e.errorMsg));
+
+                                if ((e.id & 0xFFFF0000) != Constants.ANALYZE_OPTIONS_MARKET_DATA)
+                                {
+                                    return;
+                                }
+
+                                axTws.errMsg -= errhandler;
+                                axTws.tickGeneric -= generichandler;
+                                axTws.tickPrice -= pricehandler;
+                                axTws.tickOptionComputation -= optioncomputehandler;
+                                axTws.tickSnapshotEnd -= endhandler;
+                                axTws.tickSize -= sizehander;
+                                timerOptChain.Elapsed -= timerhandler;
+
+                                for (int option_no = 0; option_no < optionchain.Count; option_no++)
+                                {
+                                    axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
+                                }
+
+                                tcs.TrySetException (new Exception (e.errorMsg));
+                            }
+                            else
+                            {
+                                m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: error {0:x} {1}", e.id, e.errorMsg));
+                            }
+                        });
+
+                        pricehandler = new AxTWSLib._DTwsEvents_tickPriceEventHandler ((s, e) =>
+                        {
+                            if ((e.id & 0xFFFF0000) != Constants.ANALYZE_OPTIONS_MARKET_DATA)
+                            {
+                                return;
+                            }
+
+                            m_Log.Log (ErrorLevel.logERR, string.Format ("FetchOptionChainMarketData: axTws_tickPrice for {0} tickType:{1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.price));
+
                             e.id &= 0xFFFF;
                             int s_no = e.id >> 8;
                             int opt_no = e.id & 0xFF;
                             StockAnal st = m_SelectedStocks[s_no];
-                            OptionInfo option = st.OptionChain[opt_no];
-                            if (option.Right == "P")
+                            OptionInfo opt = st.OptionChain[opt_no];
+
+                            switch (e.tickType)
                             {
-                                option.OpenInterest = e.size;
+                                case TickType.CLOSE:
+                                    opt.Last = e.price;
+                                    break;
+
+                                case TickType.BID:
+                                    opt.Bid = e.price;
+                                    break;
+
+                                case TickType.ASK:
+                                    opt.Ask = e.price;
+                                    break;
+
+                                default:
+                                    break;
                             }
-                        }
-                        break;
-                    case TickType.OPTION_CALL_OPEN_INTEREST:
+                        });
+
+                        sizehander = new AxTWSLib._DTwsEvents_tickSizeEventHandler ((s, e) =>
                         {
-                            e.id &= 0xFFFF;
-                            int s_no = e.id >> 8;
-                            int opt_no = e.id & 0xFF;
-                            StockAnal st = m_SelectedStocks[s_no];
-                            OptionInfo option = st.OptionChain[opt_no];
-                            if (option.Right == "C")
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickSize for {0} tickType: {1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.size));
+                            switch (e.tickType)
                             {
-                                option.OpenInterest = e.size;
+                                case TickType.OPTION_PUT_OPEN_INTEREST:
+                                    {
+                                        e.id &= 0xFFFF;
+                                        int s_no = e.id >> 8;
+                                        int opt_no = e.id & 0xFF;
+                                        StockAnal st = m_SelectedStocks[s_no];
+                                        OptionInfo option = st.OptionChain[opt_no];
+                                        if (option.Right == "P")
+                                        {
+                                            option.OpenInterest = e.size;
+                                        }
+                                    }
+                                    break;
+                                case TickType.OPTION_CALL_OPEN_INTEREST:
+                                    {
+                                        e.id &= 0xFFFF;
+                                        int s_no = e.id >> 8;
+                                        int opt_no = e.id & 0xFF;
+                                        StockAnal st = m_SelectedStocks[s_no];
+                                        OptionInfo option = st.OptionChain[opt_no];
+                                        if (option.Right == "C")
+                                        {
+                                            option.OpenInterest = e.size;
+                                        }
+                                    }
+                                    break;
+
+                                default:
+                                    break;
                             }
+                        });
+
+                        generichandler = new AxTWSLib._DTwsEvents_tickGenericEventHandler ((s, e) =>
+                        {
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickGeneric for {0} tickType: {1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.value));
+                        });
+
+                        optioncomputehandler = new AxTWSLib._DTwsEvents_tickOptionComputationEventHandler ((s, e) =>
+                        {
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickOptionComputation for {0} ticktype: {1} {2} value: {3} optPrice {3:F5} undPrice {4:F5}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.optPrice, e.undPrice));
+                            OptionComputeHandler (e);
+                        });
+
+                        endhandler = new AxTWSLib._DTwsEvents_tickSnapshotEndEventHandler ((s, e) =>
+                        {
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickSnapshotEnd for {0}", OptIdDisplay (e.reqId)));
+
+                            axTws.errMsg -= errhandler;
+                            axTws.tickGeneric -= generichandler;
+                            axTws.tickPrice -= pricehandler;
+                            axTws.tickOptionComputation -= optioncomputehandler;
+                            axTws.tickSnapshotEnd -= endhandler;
+                            axTws.tickSize -= sizehander;
+                            timerOptChain.Elapsed -= timerhandler;
+
+                            for (int option_no = 0; option_no < optionchain.Count; option_no++)
+                            {
+                                axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
+                            }
+
+                            tcs.TrySetResult (0);
+                        });
+
+                        timerhandler = new System.Timers.ElapsedEventHandler ((s, e) =>
+                        {
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: timer.ElapsedEventHandler"));
+
+                            axTws.errMsg -= errhandler;
+                            axTws.tickGeneric -= generichandler;
+                            axTws.tickPrice -= pricehandler;
+                            axTws.tickOptionComputation -= optioncomputehandler;
+                            axTws.tickSnapshotEnd -= endhandler;
+                            axTws.tickSize -= sizehander;
+                            timerOptChain.Elapsed -= timerhandler;
+
+                            for (int option_no = 0; option_no < optionchain.Count; option_no++)
+                            {
+                                axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
+                            }
+
+                            tcs.TrySetResult (0);
+                        });
+
+                        axTws.errMsg += errhandler;
+                        axTws.tickGeneric += generichandler;
+                        axTws.tickPrice += pricehandler;
+                        axTws.tickOptionComputation += optioncomputehandler;
+                        axTws.tickSnapshotEnd += endhandler;
+                        timerOptChain.Elapsed += timerhandler;
+                        axTws.tickSize += sizehander;
+
+                        timerOptChain.Start ();
+
+                        //for (int option_no = 0; option_no < 10; option_no++)
+                        for (int option_no = 0; option_no < optionchain.Count; option_no++)
+                        {
+                            OptionInfo oi = optionchain[option_no];
+
+                            IContract contract = axTws.createContract ();
+
+                            contract.symbol = "";
+                            contract.secType = "OPT";
+                            contract.exchange = "SMART";
+                            contract.localSymbol = oi.LocalSymbol;
+
+                            int x = Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no);
+                            //axTws.reqMktDataEx (Constants.ANALYZE_OPTIONS_MARKET_DATA | (stock_no << 8 + option_no), contract, "", 1);
+                            axTws.reqMktDataEx (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no), contract, "100, 101, 104, 106", 0, null);
                         }
-                        break;
-
-                    default:
-                        break;
-                }
-            });
-
-            generichandler = new AxTWSLib._DTwsEvents_tickGenericEventHandler ((s, e) =>
-            {
-                m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickGeneric for {0} tickType: {1} {2} value: {3}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.value));
-            });
-
-            optioncomputehandler = new AxTWSLib._DTwsEvents_tickOptionComputationEventHandler ((s, e) =>
-            {
-                m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickOptionComputation for {0} ticktype: {1} {2} value: {3} optPrice {3:F5} undPrice {4:F5}", OptIdDisplay (e.id), e.tickType, TickType.Display (e.tickType), e.optPrice, e.undPrice));
-                OptionComputeHandler (e);
-            });
-
-            endhandler = new AxTWSLib._DTwsEvents_tickSnapshotEndEventHandler ((s, e) =>
-            {
-                m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: axTws_tickSnapshotEnd for {0}", OptIdDisplay (e.reqId)));
-
-                axTws.errMsg -= errhandler;
-                axTws.tickGeneric -= generichandler;
-                axTws.tickPrice -= pricehandler;
-                axTws.tickOptionComputation -= optioncomputehandler;
-                axTws.tickSnapshotEnd -= endhandler;
-                axTws.tickSize -= sizehander;
-                timerOptChain.Elapsed -= timerhandler;
-
-                for (int option_no = 0; option_no < optionchain.Count; option_no++)
-                {
-                    axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
-                }
-                
-                tcs.TrySetResult (0);
-            });
-
-            timerhandler = new System.Timers.ElapsedEventHandler ((s, e) =>
-            {
-                m_Log.Log (ErrorLevel.logINF, string.Format ("FetchOptionChainMarketData: timer.ElapsedEventHandler"));
-
-                axTws.errMsg -= errhandler;
-                axTws.tickGeneric -= generichandler;
-                axTws.tickPrice -= pricehandler;
-                axTws.tickOptionComputation -= optioncomputehandler;
-                axTws.tickSnapshotEnd -= endhandler;
-                axTws.tickSize -= sizehander;
-                timerOptChain.Elapsed -= timerhandler;
-
-                for (int option_no = 0; option_no < optionchain.Count; option_no++)
-                {
-                    axTws.cancelMktData (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no));
-                }
-
-                tcs.TrySetResult (0);
-            });
-
-            axTws.errMsg += errhandler;
-            axTws.tickGeneric += generichandler;
-            axTws.tickPrice += pricehandler;
-            axTws.tickOptionComputation += optioncomputehandler;
-            axTws.tickSnapshotEnd += endhandler;
-            timerOptChain.Elapsed += timerhandler;
-            axTws.tickSize += sizehander;
-
-            timerOptChain.Start ();
-
-            //for (int option_no = 0; option_no < 10; option_no++)
-            for (int option_no = 0; option_no < optionchain.Count; option_no++)
-            {
-                OptionInfo oi = optionchain[option_no];
-
-                IContract contract = axTws.createContract ();
-
-                contract.symbol = "";
-                contract.secType = "OPT";
-                contract.exchange = "SMART";
-                contract.localSymbol = oi.LocalSymbol;
-
-                int x = Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no);
-                //axTws.reqMktDataEx (Constants.ANALYZE_OPTIONS_MARKET_DATA | (stock_no << 8 + option_no), contract, "", 1);
-                axTws.reqMktDataEx (Constants.ANALYZE_OPTIONS_MARKET_DATA | ((stock_no << 8) + option_no), contract, "100, 101, 104, 106", 0, null);
-            }
-            return tcs.Task;
+                        return tcs.Task;*/
+            return null;
         }
 
-        private void OptionComputeHandler (AxTWSLib._DTwsEvents_tickOptionComputationEvent e)
+ /*       private void OptionComputeHandler (AxTWSLib._DTwsEvents_tickOptionComputationEvent e)
         {
             if ((e.id & 0xFFFF0000) != Constants.ANALYZE_OPTIONS_MARKET_DATA)
             {
@@ -2705,7 +2709,7 @@ namespace IBFetchData
                 option.ImpliedVolatility = e.impliedVol;
             }
         }
-
+*/
         private void dgvAnalOption_CellFormatting (object sender, DataGridViewCellFormattingEventArgs e)
         {
             //if (e.ColumnIndex == 6)

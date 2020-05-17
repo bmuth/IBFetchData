@@ -83,7 +83,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabStocks = new System.Windows.Forms.TabPage();
-            this.axTws = new AxTWSLib.AxTws();
+            //this.axTws = new AxTWSLib.AxTws();
             this.btnConnect = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tbClientId = new System.Windows.Forms.TextBox();
@@ -284,7 +284,7 @@
             this.Column29 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabControl1.SuspendLayout();
             this.tabStocks.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.axTws)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.axTws)).BeginInit();
             this.tabCompanyInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCompanyInfo)).BeginInit();
             this.tabHistorical.SuspendLayout();
@@ -339,7 +339,7 @@
             // 
             // tabStocks
             // 
-            this.tabStocks.Controls.Add(this.axTws);
+            //this.tabStocks.Controls.Add(this.axTws);
             this.tabStocks.Controls.Add(this.btnConnect);
             this.tabStocks.Controls.Add(this.label1);
             this.tabStocks.Controls.Add(this.tbClientId);
@@ -355,15 +355,15 @@
             // 
             // axTws
             // 
-            this.axTws.Enabled = true;
-            this.axTws.Location = new System.Drawing.Point(568, 159);
-            this.axTws.Name = "axTws";
-            this.axTws.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axTws.OcxState")));
-            this.axTws.Size = new System.Drawing.Size(167, 70);
-            this.axTws.TabIndex = 5;
-            this.axTws.errMsg += new AxTWSLib._DTwsEvents_errMsgEventHandler(this.axTws_errMsg);
-            this.axTws.contractDetailsEnd += new AxTWSLib._DTwsEvents_contractDetailsEndEventHandler(this.axTws_contractDetailsEnd);
-            this.axTws.contractDetailsEx += new AxTWSLib._DTwsEvents_contractDetailsExEventHandler(this.axTws_contractDetailsEx);
+            //this.axTws.Enabled = true;
+            //this.axTws.Location = new System.Drawing.Point(568, 159);
+            //this.axTws.Name = "axTws";
+            //this.axTws.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axTws.OcxState")));
+            //this.axTws.Size = new System.Drawing.Size(167, 70);
+            //this.axTws.TabIndex = 5;
+            //this.axTws.errMsg += new AxTWSLib._DTwsEvents_errMsgEventHandler(this.axTws_errMsg);
+            //this.axTws.contractDetailsEnd += new AxTWSLib._DTwsEvents_contractDetailsEndEventHandler(this.axTws_contractDetailsEnd);
+            //this.axTws.contractDetailsEx += new AxTWSLib._DTwsEvents_contractDetailsExEventHandler(this.axTws_contractDetailsEx);
             // 
             // btnConnect
             // 
@@ -2420,7 +2420,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabStocks.ResumeLayout(false);
             this.tabStocks.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.axTws)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.axTws)).EndInit();
             this.tabCompanyInfo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvCompanyInfo)).EndInit();
             this.tabHistorical.ResumeLayout(false);
@@ -2591,7 +2591,7 @@
         private System.Windows.Forms.CheckBox ckbMinPremium;
         private System.Windows.Forms.TextBox tbROCThreshold;
         private System.Windows.Forms.CheckBox ckbROCThreshold;
-        private AxTWSLib.AxTws axTws;
+        //private AxTWSLib.AxTws axTws;
         private System.Windows.Forms.CheckBox cbShowTrends;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.RadioButton rbHistoricalHourly;

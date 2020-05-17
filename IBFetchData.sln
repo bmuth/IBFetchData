@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBFetchData", "IBFetchData\IBFetchData.csproj", "{A0394C00-37D8-45D0-ABF5-2284C732A584}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogCtl", "IBFetchData\LogCtl\LogCtl.csproj", "{FFAD37FD-8E09-4ACB-985B-58B59DB04876}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MuthControl", "MuthControl\MuthControl.csproj", "{AEF2A42D-B95F-4AA0-83B3-E7EB6D2F622A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CSharpAPI", "IBFetchData\client\CSharpAPI.csproj", "{181D73AB-311C-4998-818D-7B53FD6CE450}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,8 +51,23 @@ Global
 		{AEF2A42D-B95F-4AA0-83B3-E7EB6D2F622A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{AEF2A42D-B95F-4AA0-83B3-E7EB6D2F622A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AEF2A42D-B95F-4AA0-83B3-E7EB6D2F622A}.Release|x86.ActiveCfg = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Debug|x86.Build.0 = Debug|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|x86.ActiveCfg = Release|Any CPU
+		{181D73AB-311C-4998-818D-7B53FD6CE450}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D469B70-C3BF-41C0-8F49-3AD69D29C6DB}
 	EndGlobalSection
 EndGlobal

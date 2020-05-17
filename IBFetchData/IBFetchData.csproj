@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IBFetchData</RootNamespace>
     <AssemblyName>IBFetchData</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
@@ -29,7 +29,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -37,6 +37,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,6 +75,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>dbOptions.dbml</DependentUpon>
     </Compile>
+    <Compile Include="EWrapperImpl.cs" />
     <Compile Include="frmTrends.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -151,6 +153,10 @@
       <Project>{aef2a42d-b95f-4aa0-83b3-e7eb6d2f622a}</Project>
       <Name>MuthControl</Name>
     </ProjectReference>
+    <ProjectReference Include="client\CSharpAPI.csproj">
+      <Project>{181d73ab-311c-4998-818d-7b53fd6ce450}</Project>
+      <Name>CSharpAPI</Name>
+    </ProjectReference>
     <ProjectReference Include="LogCtl\LogCtl.csproj">
       <Project>{ffad37fd-8e09-4acb-985b-58b59db04876}</Project>
       <Name>LogCtl</Name>
@@ -160,23 +166,6 @@
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
-    <COMReference Include="AxTWSLib">
-      <Guid>{0A77CCF5-052C-11D6-B0EC-00B0D074179C}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>aximp</WrapperTool>
-      <Isolated>False</Isolated>
-    </COMReference>
-    <COMReference Include="TWSLib">
-      <Guid>{0A77CCF5-052C-11D6-B0EC-00B0D074179C}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
     <COMReference Include="VBIDE">
       <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
       <VersionMajor>5</VersionMajor>

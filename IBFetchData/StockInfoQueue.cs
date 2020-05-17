@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using SWI.Controls;
-using AxTWSLib;
+using IBApi;
 using System.Reflection;
 using System.IO;
 using System.Windows.Forms;
@@ -24,7 +24,7 @@ namespace IBFetchData
         //private AutoResetEvent m_Event;
         //private int m_OutstandingCalls;
         private object locker = new object ();
-        private AxTws m_axTws;
+        private EWrapperImpl ib;
 
         private CancellationTokenSource cancellation;
 
@@ -55,77 +55,78 @@ namespace IBFetchData
             }
         }
 
-        public StockInfoQueue (LogCtl log, AxTws axtws)
+        public StockInfoQueue (LogCtl log, EWrapperImpl Ib)
         {
             m_Log = log;
-            m_axTws = axtws;
+            ib = Ib;
             m_q = new Queue<StockPars> ();
             cancellation = new CancellationTokenSource ();
         }
 
         public Task run ()
         {
-            var datahandler = default (AxTWSLib._DTwsEvents_historicalDataEventHandler);
-            var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
+            /*            var datahandler = default (AxTWSLib._DTwsEvents_historicalDataEventHandler);
+                        var errhandler = default (AxTWSLib._DTwsEvents_errMsgEventHandler);
 
-            errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
-            {
-                m_axTws.historicalData -= datahandler;
-                m_axTws.errMsg -= errhandler;
-            });
+                        errhandler = new AxTWSLib._DTwsEvents_errMsgEventHandler ((s, e) =>
+                        {
+                            m_axTws.historicalData -= datahandler;
+                            m_axTws.errMsg -= errhandler;
+                        });
 
-            datahandler = new AxTWSLib._DTwsEvents_historicalDataEventHandler ((s, e) =>
-            {
-                int index = e.reqId & 0xFFFF;
+                        datahandler = new AxTWSLib._DTwsEvents_historicalDataEventHandler ((s, e) =>
+                        {
+                            int index = e.reqId & 0xFFFF;
 
-                PriceInfo pi = m_PriceInfoList[index];
+                            PriceInfo pi = m_PriceInfoList[index];
 
-                string format = "yyyyMMdd";
-                if (e.date.StartsWith ("finished"))
-                {
-                    m_Log.Log (ErrorLevel.logINF, string.Format ("historicalData: Finished collecting for [{0}]", m_PriceInfoList[index].Ticker));
-                    NotifyNewHistoricalPrice (pi, m_q.Count);
-                    return;
-                }
+                            string format = "yyyyMMdd";
+                            if (e.date.StartsWith ("finished"))
+                            {
+                                m_Log.Log (ErrorLevel.logINF, string.Format ("historicalData: Finished collecting for [{0}]", m_PriceInfoList[index].Ticker));
+                                NotifyNewHistoricalPrice (pi, m_q.Count);
+                                return;
+                            }
 
-                if ((e.reqId & 0xFFFF0000) == Constants.HISTORICAL_PRICEHOURLY)
-                {
-                    pi.PriceDate = Utils.FromUnixTime (long.Parse (e.date));
-                }
-                else
-                {
-                    pi.PriceDate = DateTime.ParseExact (e.date, format, CultureInfo.InvariantCulture);
-                }
-                pi.Open = e.open;
-                pi.Close = e.close;
-                pi.High = e.high;
-                pi.Low = e.low;
-                pi.Volume = e.volume;
-                pi.WAP = e.wAP;
+                            if ((e.reqId & 0xFFFF0000) == Constants.HISTORICAL_PRICEHOURLY)
+                            {
+                                pi.PriceDate = Utils.FromUnixTime (long.Parse (e.date));
+                            }
+                            else
+                            {
+                                pi.PriceDate = DateTime.ParseExact (e.date, format, CultureInfo.InvariantCulture);
+                            }
+                            pi.Open = e.open;
+                            pi.Close = e.close;
+                            pi.High = e.high;
+                            pi.Low = e.low;
+                            pi.Volume = e.volume;
+                            pi.WAP = e.wAP;
 
-                m_Log.Log (ErrorLevel.logINF, string.Format ("historicalData:[{0}] {1} open: {2} close: {3} high: {4} low: {7} vol: {5} WAP: {6}",
-                   m_PriceInfoList[index].Ticker, pi.PriceDate.ToString ("yyyy-MM-dd"), e.open.ToString (), e.close.ToString (), e.high.ToString (), e.volume.ToString (), e.wAP.ToString (), e.low.ToString ()));
+                            m_Log.Log (ErrorLevel.logINF, string.Format ("historicalData:[{0}] {1} open: {2} close: {3} high: {4} low: {7} vol: {5} WAP: {6}",
+                               m_PriceInfoList[index].Ticker, pi.PriceDate.ToString ("yyyy-MM-dd"), e.open.ToString (), e.close.ToString (), e.high.ToString (), e.volume.ToString (), e.wAP.ToString (), e.low.ToString ()));
 
-                using (dbOptionsDataContext dc = new dbOptionsDataContext ())
-                {
-                    if ((e.reqId & 0xFFFF0000) != Constants.HISTORICAL_IV)
-                    {
-                        dc.UpsertPriceHistory (pi.Ticker, pi.PriceDate, (decimal) pi.Close, (decimal) pi.Open, (decimal) pi.High, (decimal) pi.Low, pi.Volume, (decimal) pi.WAP);
-                    }
-                    else
-                    {
-                        dc.UpsertIVHistory (pi.Ticker, pi.PriceDate, pi.Close, pi.Open, pi.High, pi.Low);
-                    }
-                }
-            });
+                            using (dbOptionsDataContext dc = new dbOptionsDataContext ())
+                            {
+                                if ((e.reqId & 0xFFFF0000) != Constants.HISTORICAL_IV)
+                                {
+                                    dc.UpsertPriceHistory (pi.Ticker, pi.PriceDate, (decimal) pi.Close, (decimal) pi.Open, (decimal) pi.High, (decimal) pi.Low, pi.Volume, (decimal) pi.WAP);
+                                }
+                                else
+                                {
+                                    dc.UpsertIVHistory (pi.Ticker, pi.PriceDate, pi.Close, pi.Open, pi.High, pi.Low);
+                                }
+                            }
+                        });
 
-            m_axTws.historicalData += datahandler;
-            m_axTws.errMsg += errhandler;
+                        m_axTws.historicalData += datahandler;
+                        m_axTws.errMsg += errhandler;
 
-            return RepeatActionEvery (FetchWork, new TimeSpan (0, 0, 11));
+                        return RepeatActionEvery (FetchWork, new TimeSpan (0, 0, 11));*/
+            return null;
         }
 
-
+/*
         private bool FetchWork ()
         {
             if (m_q.Count <= 0)
@@ -206,13 +207,13 @@ namespace IBFetchData
                 return true;
             }
         }
-
+*/
         public void stop ()
         {
             if (!cancellation.IsCancellationRequested)
             {
                 m_Log.Log (ErrorLevel.logINF, "cancelling token in StockInfoQueue");
-                m_axTws.cancelHistoricalData (m_Current_ID);
+//                m_axTws.cancelHistoricalData (m_Current_ID);
                 cancellation.Cancel ();
             }
         }
